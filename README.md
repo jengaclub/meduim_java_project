@@ -16,3 +16,7 @@ the base which the number is currently in
 the number
 the required base of the given number
 -> also catches illegal base enteries(outside range bases and alphabets as base)
+
+4.Matrixprocesor.java
+->does basic matrix operation adding 2 matrices, multiplying them, finding the determinant of a matrix, inverse of a matrix, and transposing a matrix
+and multiplying a matrix with a constant
