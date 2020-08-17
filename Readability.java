@@ -1,4 +1,4 @@
-package readability;
+//input type:reads from a file (full filename to be put in commandline, then prints out the readability score on the console)
 import java.util.Scanner;
 import java.io.*;
 
@@ -8,21 +8,21 @@ public class Readability {
         File file = new File(args[0]);
         int letterC,wordC,sentenceC;
         String inputString;
-        try (Scanner scanner = new Scanner(file)) {
+        try (Scanner scanner = new Scanner(file)) { //reads from a existing file
             System.out.println("The text is:");
             inputString = scanner.nextLine();
             System.out.println(inputString);
             System.out.print("\n");
             Readability obj = new Readability();
-            String syllableString =  inputString.replaceAll("[.,?!]","");
-            String[] words = syllableString.split("\\s+");
+            String syllableString =  inputString.replaceAll("[.,?!]","");//replace all these symbols in the sentence that we want to count the number of syllabuls in
+            String[] words = syllableString.split("\\s+"); //array of words
             int[] a;
-            a = obj.SyllableCounter(words);
+            a = obj.SyllableCounter(words); //a contains the number of syllabuls and pollysylabuls in the word array passed
             int syllables = a[0];
             int polySyllables = a[1];
-            letterC = obj.letterCount(inputString);
-            wordC = obj.wordCount(inputString);
-            sentenceC = obj.sentenceCount(inputString);
+            letterC = obj.letterCount(inputString);//number of letters
+            wordC = obj.wordCount(inputString);//number of words
+            sentenceC = obj.sentenceCount(inputString);//number of sentences
 
             System.out.println("Words: "+wordC);
             System.out.println("Sentences: "+sentenceC);
@@ -30,10 +30,10 @@ public class Readability {
             System.out.println("Syllables: "+syllables);
             System.out.println("Polysyllables: "+polySyllables);
 
-            System.out.print("Enter the score you want to calculate (ARI, FK, SMOG, CL, all): ");
-            String choice = "all";
-            System.out.println(choice);
-            System.out.print("\n");
+            System.out.print("These are the readabilty indexes calculated: Automated Readability Index\n Flesch–Kincaid readability tests\n");
+            System.out.print( "Simple Measure of Gobbledygook\n Coleman–Liau index\n");
+            
+            //**********calcluating the ratios required for the score calculation and calculating the score***************************//
             float ratioLW = (float) letterC / (float) wordC;//ratio of letter per word
             float ratioWS = (float) wordC / (float) sentenceC;//ratio of word per sentence
             float score = (float) (4.71 * ratioLW + (0.5 * ratioWS - 21.43));
@@ -59,7 +59,7 @@ public class Readability {
         }
 
         catch (FileNotFoundException e){
-            System.out.println("File not found!");
+            System.out.println("File not found!"); //error message if no file inputted
         }
     }
 
@@ -79,19 +79,25 @@ public class Readability {
         }
         return sentenceNumber;
     }
-    public int[] SyllableCounter(String[] words){
+    public int[] SyllableCounter(String[] words){ /*returns an array (a) containing the total number of syllabuls and polysyllabels
+    rules for counting syllbles:
+    1.Count the number of vowels in the word.
+    2. Do not count double-vowels (for example, "rain" has 2 vowels but only 1 syllable).
+    3. If the last letter in the word is 'e' do not count it as a vowel (for example, "side" has 1 syllable).
+    4. If at the end it turns out that the word contains 0 vowels, then consider this word as a 1-syllable one.
+    */
         int[] array = {0,0};
         //declaring the array containing the count of syllables  and the polySyllables
-        int i, j, count, polyCount = 0;
+        int i, j, count/*for syllables*/,/*for polysyllables*/ polyCount = 0;
         boolean prevVowel;
         String word1;
         String word ;
         for (i = 0; i < words.length ; i++){ //this loop loops through ever word in the sentence passed
-            word1 = words[i]; //word is the word at the particular instance of i;
+            word1 = words[i]; //word is the word form the array of words at the particular instance of i;
             count = 0;
             prevVowel = false;
                 if(word1.charAt(word1.length() - 1) == 'e'){
-                    word = word1.substring(0,word1.length() - 1); //removes the letter e from the word if it appears last in the word
+                    word = word1.substring(0,word1.length() - 1); //removes the letter e from the word if it appears last in the word (rule for counting syllables)
                 }
                 else{
                     word = word1;
@@ -105,17 +111,24 @@ public class Readability {
                            }
                        }
 
-                    if (j >=1  && prevVowel) { //if the index is not the first character,and the previous character is also a vowel
+                    if (j >=1  && prevVowel) { //not the first character(j=0),and the previous character is also a vowel
                         count--;
                         prevVowel = false;
                     }
                 }//traversing through each character ends
+                if (count != 0)//if there are syllables
+                {
                 array[0] += count; //total number of syllables gets added word by word
-                if (count > 2) {
+                }
+            else{ //if 0 syllbles found
+                array[0] += 1;//see last rule,if no vowles found,consider one syllble
+            }
+                
+                if (count > 2) { //polysyallbul is a word with more than two syllabuls
                     polyCount++;
                 }
         }//traversing through different word done
-        array[1] = polyCount;
+        array[1] = polyCount; //total number of polysyllbuls
         return array;
     }
     public boolean isVowel(char word){
@@ -127,6 +140,7 @@ public class Readability {
             return false;
     }
     public int print(float score) {
+        //according to rules
         int year = 0;
         if (score <= 1) {
             System.out.print(" (about 6 year olds).");
